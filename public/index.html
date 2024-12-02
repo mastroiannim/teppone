@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="/socket.io/socket.io.js"></script> 
+</head>
+
+<body>
+
+    <h1>Chat Room</h1>
+    <input type="text" id="message" placeholder="Type your message…">
+    <button id="send-btn">Send</button>
+    <ul id="messages"></ul>
+
+    <script>
+        const socket = io(); // Connect to the server
+
+        socket.on('welcome', (msg) => {
+            alert(msg);
+        });
+
+        const messageInput = document.getElementById('message');
+        const sendButton = document.getElementById('send-btn');
+        const messagesList = document.getElementById('messages');
+        sendButton.addEventListener('click', () => {
+        const message = messageInput.value;
+        socket.emit('chat message', message); // Emit the message to the server
+        messageInput.value = ''; // Clear the input field
+        });
+        socket.on('chat message', (msg) => { // Listen for incoming messages
+        const listItem = document.createElement('li');
+        listItem.textContent = msg;
+        messagesList.appendChild(listItem);
+        scrollDown(); // Function to scroll chat history to the bottom (implementation omitted for brevity)
+        });
+        
+    </script>
+
+
+    <input type="submit" value="tutti" onClick="studenti('/students')">
+    <input type="submit" value="presenti" onClick="studenti('/students/presenti')">
+
+    <div id="out">
+    </div>
+
+    <script>
+        function studenti(endpoint) {
+            
+            let cell = document.getElementById("out").innerHTML = '<p id="spin">caricamento...</p>'
+            const xhttp = new XMLHttpRequest();
+            xhttp.onload = function () {
+                let res = JSON.parse(this.responseText);
+                let cell = document.getElementById("out")
+                console.log(res);
+                res.studenti.forEach(element => {
+                    let p = document.createElement("P");
+                    p.textContent = element.nome;
+                    cell.appendChild(p);
+                });
+                document.getElementById("spin").innerHTML = ""
+            }
+            xhttp.open("GET", endpoint, true);
+            xhttp.send();
+        }
+    </script>
+</body>
