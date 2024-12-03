@@ -41,6 +41,21 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 })
 
+// Registra Utente da admin
+app.post('/registraUtente', (req, res) => {
+    // read the username and password data from form html
+    const username = req.body.username;
+    const password = req.body.password;
+    const nome = req.body.nome;
+    const ruolo = 'user';
+
+    //save user in db
+    const user = db.createUser({username, nome, ruolo, password});
+    req.session.message = 'Utente id:(' + user.id + ') creato con successo';
+    res.redirect('/home');
+
+});
+
 // Login Post
 // read the username and password data from form html
 app.post('/login', (req, res) => {
@@ -84,7 +99,7 @@ app.get('/home', (req, res) => {
             res.render('admin/home', {
                 name: req.session.name,
                 role: req.session.role,
-                message: 'Welcome back, ' + req.session.name + '!'
+                message: req.session.message
             });
         }else {
             res.render('home', {
