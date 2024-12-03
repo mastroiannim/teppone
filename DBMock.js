@@ -23,6 +23,10 @@ class DBMock {
         return null;
     }
 
+    getUserByUsername(username) {
+        return this.users.find(user => user.username === username);
+    }
+
     // Crea un nuovo utente
     createUser({ username, nome, ruolo, password }) {
         if (!username || !nome || !ruolo || !password) {

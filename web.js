@@ -1,16 +1,19 @@
 const express  = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('scuola.db');
-const hbs = require('hbs');
+//const cors = require('cors');
 
-hbs.registerPartials(path.join(__dirname, 'views/partials'));
+//const sqlite3 = require('sqlite3').verbose();
+//const db = new sqlite3.Database('scuola.db');
+const mock = require('./DBMock.js');
+const db = new mock();
+
+const hbs = require('hbs');
 
 
 //use sessions for tracking logins
 const session = require('express-session');
+const DBMock = require('./DBMock.js');
 
 // Create express app using session
 const app = express();
@@ -50,14 +53,16 @@ app.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
-    //check inline embedded password for root
-    if (username === 'root' && password === 'root') {
+    //chek if username and password are correct
+    
+    const user = db.getUserByUsername(username);
+    if (user && user.password === password) {
         req.session.loggedin = true;
-        req.session.username = username;
-        req.session.name = "Mastroianni Michele";
-        //redirect to home page
+        req.session.name = user.nome;
+        req.session.role = user.ruolo;
         res.redirect('/home');
-    } else {
+    }
+    else {
         //res.send('Incorrect Username and/or Password!');
         res.render('error', {
             message: 'Incorrect Username and/or Password!'
@@ -75,9 +80,19 @@ app.get('/home', (req, res) => {
 
     //verifica se l'utente è loggato
     if (req.session.loggedin) {
-        res.render('home', {
-            name: req.session.name
-          });
+        if(req.session.role === 'admin') {
+            res.render('admin/home', {
+                name: req.session.name,
+                role: req.session.role,
+                message: 'Welcome back, ' + req.session.name + '!'
+            });
+        }else {
+            res.render('home', {
+                name: req.session.name,
+                role: req.session.role,
+                message: 'Welcome back, ' + req.session.name + '!'
+            });
+        }
         //res.send('Welcome back, ' + req.session.name + '!' + '<br>' + '<a href="/logout">Logout</a>');
     } else {
         //redirect to login page
